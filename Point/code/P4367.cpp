@@ -5,11 +5,13 @@
 #define cmin(a,b) (b<a?a=b:a)
 using namespace std;
 const int N=150005,inf=1e9;
+typedef long long ll;
+const ll INF=1e18;
 int La[N],To[N*2],Ne[N*2],Le[N*2],TOT;
 int n,Q,A,S,Size[N],Fa[N],MIN,Root;
 int C[N],root;
 bool vis[N];int Dep[N],Dis[32][N],*dis,*predis;
-typedef pair<int,int> pp;
+typedef pair<int,ll> pp;
 vector<pp> Dist[N],*dist;
 void AE(int x,int y,int z) {
 	To[++TOT]=y;
@@ -29,7 +31,7 @@ void GenSize(int u,int f) {
 	if(MAX<MIN) MIN=MAX,Root=u;
 }
 int FindRoot(int u,int s) {
-	S=s;GenSize(u,0);return Root; 
+	S=s;MIN=inf;GenSize(u,0);return Root; 
 }
 void GenDis(int u,int f) {
 	int i,j,k,v;
@@ -64,17 +66,19 @@ void init(int u,int s,int dep) {
 		Fa[v]=u;init(v,k,dep+1);
 	}
 }
-int getAns(int u,int L,int R) {
-	int ret=0,l,r;
-	while(u!=root) {
-		// ret+=
-		ret+=lower_bound(Dist[u].begin(),Dist[u].end(),pp(L,-1))->second-
-		upper_bound(Dist[u].begin(),Dist[u].end(),pp(R,inf))->second;
+ll getAns(int u,int L,int R) {
+	ll ret=0;int x=u;
+	while(u) {
+		auto t1=lower_bound(Dist[u].begin(),Dist[u].end(),pp(L,-INF)),
+			t2=upper_bound(Dist[u].begin(),Dist[u].end(),pp(R,INF));
+		ret+=(t2-t1)*(Dis[Dep[u]][x]-Dis[Dep[u]-1][x])+t1->second-t2->second;
+		u=Fa[u];
 	}
 	return ret;
 }
 int main() {
-	int i,j,k,x,y,z,ans=0,u,a,b;
+	int i,j,k,x,y,z,u,a,b;
+	ll ans=0;
 	scanf("%d%d%d",&n,&Q,&A);
 	for(i=1;i<=n;i++) scanf("%d",&C[i]);
 	for(i=1;i<n;i++) {
@@ -86,6 +90,7 @@ int main() {
 	while(Q--) {
 		scanf("%d%d%d",&u,&a,&b);
 		a=(a+ans)%A;b=(b+ans)%A;
-		printf("%d\n",ans=getAns(u,a,b));
+		if(a>b) swap(a,b);
+		printf("%lld\n",ans=getAns(u,a,b));
 	}
 }
